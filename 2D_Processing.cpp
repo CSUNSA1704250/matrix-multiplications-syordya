@@ -27,8 +27,24 @@ void *process_2D(void *threadarg) {
 }
 
 
+void Gen_matrix(int ** A, int n) {
+   int i, j;
+   for (i = 0; i < n; i++)
+      for (j = 0; j < n; j++)
+         A[i][j] = rand() % 1000;
+}
+
+
+
+void Gen_vector(int *x, int n) {
+   int i;
+   for (i = 0; i < n; i++)
+      x[i] = rand() % 1000;
+}
+
+
 int main( int argc, char** argv ) {
-  
+  srand (time(NULL));
   if(argc != 2) 
   {
     std::cout << "Establezca los threads" << std::endl;
@@ -50,9 +66,21 @@ int main( int argc, char** argv ) {
 
   // Inicio de vector y matrices;
 
-  int M[cant_threads][cant_threads] = {{1,3,4},{5,6,7},{7,8,6}};
-  int X[cant_threads] = {2,5,6};
-  int Y[cant_threads] = {0,0,0};
+  //int M[cant_threads][cant_threads] = {{1,3,4},{5,6,7},{7,8,6}};
+  int Y[cant_threads];
+  int **M = new int *[cant_threads];
+  for (int i = 0; i < cant_threads; ++i)
+  {
+    M[i] = new int[cant_threads];
+    Y[i] = 0;
+  }
+
+  int *X = new int[cant_threads];
+  
+
+
+  Gen_matrix(M, cant_threads);
+  Gen_vector(X, cant_threads);
 
   // Inicialización y seteo de los thread para que sean juntables(joinables)
 
@@ -62,6 +90,8 @@ int main( int argc, char** argv ) {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   // Inicio de los threads
 
+
+  TIMERSTART(start);
   for(int i = 0; i < cant_threads; i++ ) {
       //cout <<"main() : creating thread, " << i << endl;
       
@@ -88,10 +118,9 @@ int main( int argc, char** argv ) {
          cout << "Error, no es posible aplicar join" << rc << endl;
          exit(-1);
       }
-      cout << "Thread completado, id :" << i <<endl;
    }
 
-
+   TIMERSTOP(start);
    for (int i = 0; i < cant_threads; ++i)
    {
       cout << Y[i] << endl;
